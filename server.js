@@ -9,10 +9,10 @@ const PORT = process.env.PORT || 3000;
 // Verificar si el ACCESS_TOKEN está presente
 if (!process.env.ACCESS_TOKEN) {
     console.error("ACCESS_TOKEN de Mercado Pago no configurado.");
-    process.exit(1); // Salir del servidor si no está configurado el token
+    process.exit(1); // Salir si no está configurado el token
 }
 
-// Configurar Mercado Pago correctamente
+// Configurar Mercado Pago
 const client = new mercadopago.MercadoPagoConfig({
     accessToken: process.env.ACCESS_TOKEN
 });
@@ -24,7 +24,7 @@ app.use(cors());
 // Ruta para crear una preferencia de pago
 app.post("/crear-preferencia", async (req, res) => {
     try {
-        const { items } = req.body; // Recibir productos desde el frontend
+        const { items } = req.body;
 
         const preference = {
             items: items.map(item => ({
@@ -34,15 +34,16 @@ app.post("/crear-preferencia", async (req, res) => {
                 currency_id: "ARS"
             })),
             back_urls: {
-                success: "https://tusitio.com/exito",
-                failure: "https://tusitio.com/fallo",
-                pending: "https://tusitio.com/pendiente"
+                success: "https://pagos-u8dl.onrender.com/redirigir",
+                failure: "https://pagos-u8dl.onrender.com/redirigir",
+                pending: "https://pagos-u8dl.onrender.com/redirigir"
             },
             auto_return: "approved"
         };
 
         const preferenceClient = new mercadopago.Preference(client);
         const response = await preferenceClient.create({ body: preference });
+
         res.json({ id: response.id });
 
     } catch (error) {
@@ -57,7 +58,12 @@ app.post("/notificacion", (req, res) => {
     res.sendStatus(200);
 });
 
-// Iniciar servidor
+// Ruta de redirección post-pago
+app.get("/redirigir", (req, res) => {
+    res.redirect("https://sites.google.com/view/bienestarbiencr/tiendatest");
+});
+
+// Iniciar el servidor
 app.listen(PORT, () => {
     console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });
